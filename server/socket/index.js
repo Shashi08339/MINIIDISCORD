@@ -84,6 +84,27 @@ module.exports = (server) => {
       io.to(room).emit("message", msg);
     });
 
+    // FILE MESSAGE
+    socket.on("file-message", async ({ room, fileUrl, fileName, fileType }) => {
+      if (!room || !fileUrl || !fileName || !fileType || !socket.username) return;
+
+      const msg = new Message({
+        room,
+        username: socket.username,
+        text: fileName,
+        time: formatTime(),
+        system: false,
+        reactions: {},
+        ownerId: socket.id,
+        fileUrl,
+        fileName,
+        fileType,
+      });
+
+      await msg.save();
+      io.to(room).emit("message", msg);
+    });
+
     // DISCONNECT
     socket.on("disconnect", async () => {
       const room = socket.currentRoom;

@@ -1,7 +1,10 @@
+const fs = require("fs");
+const path = require("path");
 const multer = require("multer");
 
 module.exports = (app) => {
-  const uploadDir = "uploads";
+  const uploadDir = path.resolve(__dirname, "../../uploads");
+  fs.mkdirSync(uploadDir, { recursive: true });
 
   const storage = multer.diskStorage({
     destination: uploadDir,

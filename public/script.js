@@ -134,6 +134,7 @@ function createMessageElement(msg) {
   row.classList.add("message-row");
   if (msg.system) row.classList.add("system");
   if (!msg.system && msg.username === username) row.classList.add("self");
+  msg.id = msg.id || msg._id;
   row.dataset.id = msg.id;
 
   const meta = document.createElement("div");
@@ -173,6 +174,12 @@ function createMessageElement(msg) {
       img.src = msg.fileUrl;
       img.className = "file-preview";
       bubble.appendChild(img);
+    } else if (msg.fileType && msg.fileType.startsWith("audio/")) {
+      const audio = document.createElement("audio");
+      audio.controls = true;
+      audio.src = msg.fileUrl;
+      audio.className = "file-preview";
+      bubble.appendChild(audio);
     } else {
       const link = document.createElement("a");
       link.href = msg.fileUrl;
@@ -262,13 +269,17 @@ function formatReactionCounts(reactions) {
   return parts.join("  ");
 }
 
+function scrollChatToBottom() {
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
 function renderMessages(messages) {
   chatBox.innerHTML = "";
   messages.forEach((m) => {
     const el = createMessageElement(m);
     chatBox.appendChild(el);
   });
-  chatBox.scrollTop = chatBox.scrollHeight;
+  scrollChatToBottom();
 }
 
 function updateSingleMessage(msg) {
@@ -287,7 +298,7 @@ function updateSingleMessage(msg) {
   } else {
     chatBox.replaceChild(newEl, node);
   }
-  chatBox.scrollTop = chatBox.scrollHeight;
+  scrollChatToBottom();
 }
 
 // search
@@ -379,7 +390,7 @@ socket.on("kicked", ({ room }) => {
 joinBtn.addEventListener("click", joinRoom);
 sendBtn.addEventListener("click", sendMessage);
 messageInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
+  if (e.key === "Enter" || e.keyCode === 13) {
     e.preventDefault();
     sendMessage();
   }
